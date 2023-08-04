@@ -1,5 +1,5 @@
 from rest_framework.views import APIView
-from rest_framework.generics import ListAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.generics import ListAPIView, RetrieveUpdateDestroyAPIView, CreateAPIView
 
 from rest_framework.response import Response
 from rest_framework import status
@@ -13,17 +13,12 @@ from .serializers import CompanyCreateEmployeeSerializer, CompanySerializer, Emp
 from .models import Company
 
 
-class CompanyCreateAPIView(APIView):
-    def post(self, request, format=None):
-        serializer = CompanySerializer(data=request.data)
-
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+class CompanyCreateAPIView(CreateAPIView):
+    serializer_class = CompanySerializer
 
 
-class CompanyCreateEmployee(APIView):
-    def post(self, request, company_id, format=None):
+class CompanyCreateEmployee(CreateAPIView):
+    def create(self, request, company_id, *args, **kwargs):
         data = request.data.copy()
         data['password'] = make_password(data['password'])
 
@@ -31,11 +26,10 @@ class CompanyCreateEmployee(APIView):
         data['company'] = company.id
 
         serializer = CompanyCreateEmployeeSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
 
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
     
 
 class CompanyEmployeeListView(ListAPIView):
