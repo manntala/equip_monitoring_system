@@ -1,5 +1,5 @@
 from rest_framework.views import APIView
-from rest_framework.generics import ListAPIView
+from rest_framework.generics import ListAPIView, CreateAPIView
 from rest_framework.response import Response
 from rest_framework import status
 from equipment.models import Equipment
@@ -7,15 +7,8 @@ from equipment.models import Equipment
 from equipment.serializers import EquipmentSerializer
 
 
-class EquipmentCreateView(APIView):
-    def post(self, request, format=None):
-        serializer = EquipmentSerializer(data=request.data)
-
-        if serializer.is_valid():
-            serializer.save()
-
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+class EquipmentCreateView(CreateAPIView):
+    serializer_class = EquipmentSerializer
     
 
 class EquipmentListView(ListAPIView):
