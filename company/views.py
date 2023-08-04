@@ -5,6 +5,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth.hashers import make_password
 from django.shortcuts import get_object_or_404
+from equipment import EquipmentStatus
+from equipment.models import Equipment
 
 from user.models import User
 
@@ -53,3 +55,61 @@ class CompanyEmployeeDetailView(RetrieveUpdateDestroyAPIView):
         queryset = User.objects.filter(id=employee_id, company__id=company_id)
 
         return queryset
+    
+
+class CompanyAssignEquipmentView(APIView):
+    def post(self, request, company_id, employee_id, *args, **kwargs):
+        try:
+            company = get_object_or_404(Company, id=company_id)
+            user = User.objects.get(company=company, id=employee_id)
+        except User.DoesNotExist:
+            return Response(f"User not found with an id {employee_id} in this company.", status=404)
+
+        equipment_ids = request.data.get('equipment', [])
+
+        assigned_equipment = Equipment.objects.filter(id__in=equipment_ids, status=EquipmentStatus.ASSIGNED)
+        if assigned_equipment.exists():
+            return Response("Cannot assign already assigned equipment.", status=400)
+
+        equipment = Equipment.objects.filter(id__in=equipment_ids)
+
+        user.equipment.add(*equipment)
+
+        equipment.update(status=EquipmentStatus.ASSIGNED)
+
+        user_serializer = UserEmployeeSerializer(user)
+
+        response_data = {
+            'user': user_serializer.data,
+        }
+
+        return Response(response_data, status=200)
+    
+
+class CompanyReturnEquipmentView(APIView):
+    def post(self, request, company_id, employee_id, *args, **kwargs):
+        try:
+            company = get_object_or_404(Company, id=company_id)
+            user = User.objects.get(company=company, id=employee_id)
+        except User.DoesNotExist:
+            return Response(f"User not found with an id {employee_id} in this company.", status=404)
+
+        equipment_ids = request.data.get('equipment', [])
+
+        assigned_equipment = Equipment.objects.filter(id__in=equipment_ids)
+        if not assigned_equipment.exists():
+            return Response("Equipment not assigned.", status=400)
+
+        equipment = Equipment.objects.filter(id__in=equipment_ids)
+
+        user.equipment.remove(*equipment)
+
+        equipment.update(status=EquipmentStatus.UNASSIGNED)
+
+        user_serializer = UserEmployeeSerializer(user)
+
+        response_data = {
+            'user': user_serializer.data,
+        }
+
+        return Response(response_data, status=200)

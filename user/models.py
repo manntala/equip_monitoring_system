@@ -1,12 +1,11 @@
-from typing import Any
-from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from model_utils.models import TimeStampedModel
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.db import models
+from django.utils import timezone
 from company.models import Company, Department
 from equipment.models import Equipment
 
 from user import Gender
-
 
 class UserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
@@ -28,31 +27,28 @@ class UserManager(BaseUserManager):
             raise ValueError('Superuser must have is_superuser=True.')
 
         return self.create_user(email, password, **extra_fields)
-    
 
-class User(AbstractBaseUser, TimeStampedModel):
+
+class User(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
     email = models.EmailField(unique=True)
     first_name = models.CharField(blank=False, max_length=100)
-    middle_name = models.CharField(blank=False, max_length=100)
-    last_name = models.CharField(blank=False, max_length=100)
+    middle_name = models.CharField(blank=True, max_length=50)
+    last_name = models.CharField(blank=False, max_length=50)
+    is_staff = models.BooleanField(default=False)
+    
     gender = models.CharField(choices=Gender.CHOICES, max_length=10)
     contact_number = models.CharField(max_length=50, null=True)
-    
-    employee_number = models.CharField(max_length=20, blank=True)
-    job_title = models.CharField(max_length=50, blank=True)
 
-    department = models.ForeignKey(Department, on_delete=models.CASCADE, related_name="users", null=True)
-    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name="users", null=True)
-    equipment = models.ForeignKey(Equipment, on_delete=models.CASCADE, related_name="users", null=True)
+    employee_number = models.CharField(max_length=40, blank=True)
+    job_title = models.CharField(max_length=100, blank=True)
+    department = models.ForeignKey(Department, on_delete=models.CASCADE, related_name='users', null=True)
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='users', null=True)
+    equipment = models.ManyToManyField(Equipment, related_name='users', blank=True)
 
-    is_staff = models.BooleanField(default=False)
-
-    USERNAME_FIELD = "email"
+    USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
 
-    objects = UserManager
+    objects = UserManager()
 
-    def __str__(self) -> str:
+    def __str__(self):
         return f"{self.first_name} {self.last_name}"
-    
-
