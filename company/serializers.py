@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from user.models import User
-from .models import Company
+from .models import Company, Department
 
 from equipment.serializers import EquipmentSerializer
 
@@ -69,3 +69,9 @@ class EmployeeDetailSerializer(serializers.ModelSerializer):
             'company',
             'equipment'
         ] 
+
+
+class DepartmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Department
+        fields = '__all__'

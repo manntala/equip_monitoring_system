@@ -10,9 +10,9 @@ from equipment.models import Equipment
 
 from user.models import User
 
-from .serializers import CompanyCreateEmployeeSerializer, CompanySerializer, EmployeeDetailSerializer, UserEmployeeSerializer
+from .serializers import CompanyCreateEmployeeSerializer, CompanySerializer, DepartmentSerializer, EmployeeDetailSerializer, UserEmployeeSerializer
 
-from .models import Company
+from .models import Company, Department
 
 
 class CompanyCreateAPIView(CreateAPIView):
@@ -113,3 +113,13 @@ class CompanyReturnEquipmentView(APIView):
         }
 
         return Response(response_data, status=200)
+    
+
+class DepartmentCreateView(CreateAPIView):
+    serializer_class = DepartmentSerializer
+
+
+class DepartmentListView(ListAPIView):
+    serializer_class = DepartmentSerializer
+    queryset = Department.objects.all().order_by('-created')
+

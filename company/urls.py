@@ -6,6 +6,8 @@ from .views import (
     CompanyEmployeeDetailView,
     CompanyAssignEquipmentView,
     CompanyReturnEquipmentView,
+    DepartmentListView,
+    DepartmentCreateView
     )
 
 urlpatterns = [
@@ -16,5 +18,8 @@ urlpatterns = [
 
     path('<int:company_id>/employee/<int:employee_id>/assign/', CompanyAssignEquipmentView.as_view(), name='company-assign-equipment'),
     path('<int:company_id>/employee/<int:employee_id>/return/', CompanyReturnEquipmentView.as_view(), name='company-return-equipment'),
+
+    path('department/', DepartmentListView.as_view(), name='department-list'),
+    path('department/create/', DepartmentCreateView.as_view(), name='department-create'),
 
 ]
