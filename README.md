@@ -1,6 +1,4 @@
-# repliq_monitoring_system
-
-This is my Django Practical Challenge app for assigning/returning company equipments
+# equip_monitoring_system
 
 1. The homepage will display all the API endpoints.
 http://127.0.0.1:8000/
